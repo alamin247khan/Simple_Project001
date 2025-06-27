@@ -1,5 +1,6 @@
 #root {
   display: flex;
+  margin: auto;
   min-height: 100vh;
 }
 
@@ -17,9 +18,7 @@
 
 .app h1 {
   margin-bottom: 3rem;
-  background: linear-gradient(135deg, #646cff, #61dafb);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
   font-size: 2.5rem;
 }
