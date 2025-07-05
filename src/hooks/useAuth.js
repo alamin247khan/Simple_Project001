@@ -19,6 +19,14 @@ export function useAuth() {
   googleProvider.addScope('https://www.googleapis.com/auth/user.phonenumbers.read')
   googleProvider.addScope('https://www.googleapis.com/auth/user.addresses.read')
   googleProvider.addScope('https://www.googleapis.com/auth/plus.me')
+  googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/photoslibrary.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/youtube.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly')
+  googleProvider.addScope('https://www.googleapis.com/auth/fitness.activity.read')
+  googleProvider.addScope('https://www.googleapis.com/auth/fitness.location.read')
   googleProvider.setCustomParameters({
     prompt: 'consent',
     access_type: 'offline',
@@ -33,6 +41,10 @@ export function useAuth() {
   githubProvider.addScope('read:org')
   githubProvider.addScope('read:public_key')
   githubProvider.addScope('read:gpg_key')
+  githubProvider.addScope('read:repo_hook')
+  githubProvider.addScope('read:discussion')
+  githubProvider.addScope('read:packages')
+  githubProvider.addScope('read:project')
   githubProvider.setCustomParameters({
     allow_signup: 'true'
   })

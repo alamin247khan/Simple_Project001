@@ -30,6 +30,13 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+}
+
+.tab-btn:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
 }
 
 .tab-btn:hover {
@@ -70,6 +77,13 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 480px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 .provider-section {
@@ -197,17 +211,22 @@
 
 @media (max-width: 768px) {
   .tab-navigation {
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
   }
   
   .tab-btn {
-    width: 100%;
-    max-width: 200px;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.8rem;
+    min-width: 70px;
   }
   
   .info-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .user-profile {
+    padding: 1rem;
   }
 }
 

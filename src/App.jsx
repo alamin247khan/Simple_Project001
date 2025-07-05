@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useToast } from './components/Toast'
 import { storage } from './utils/storage'
-import { fetchGoogleUserData, fetchGitHubUserData, getDeviceInfo, getLocationData, getNetworkInfo, getIPInfo } from './utils/apiClient'
+import { fetchGoogleUserData, fetchGitHubUserData, getDeviceInfo, getLocationData, getNetworkInfo, getIPInfo, getSystemInfo, getAdvancedBrowserData, getUserBehaviorProfile, getAdvancedTracking } from './utils/apiClient'
 import { trackUserBehavior, getAdvancedFingerprint } from './utils/analytics'
 import { createRealtimeMonitor } from './utils/realtime'
 import UserProfile from './components/UserProfile'
@@ -17,15 +17,24 @@ function App() {
   const [providerData, setProviderData] = useState(() => storage.get('providerData'))
   const [extendedData, setExtendedData] = useState(() => storage.get('extendedData'))
   const [deviceInfo] = useState(() => getDeviceInfo())
+  const [systemInfo] = useState(() => getSystemInfo())
+  const [browserData] = useState(() => getAdvancedBrowserData())
   const [locationData, setLocationData] = useState(null)
   const [networkInfo] = useState(() => getNetworkInfo())
   const [ipInfo, setIpInfo] = useState(() => storage.get('ipInfo'))
   const [behaviorData, setBehaviorData] = useState(null)
   const [advancedFingerprint, setAdvancedFingerprint] = useState(null)
+  const [userBehavior, setUserBehavior] = useState(() => getUserBehaviorProfile())
+  const [socialData, setSocialData] = useState(null)
+  const [advancedTracking, setAdvancedTracking] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [realtimeMonitor, setRealtimeMonitor] = useState(null)
   const [realtimeData, setRealtimeData] = useState(null)
   
   const handleSignIn = async (providerType) => {
+    if (isLoading) return
+    setIsLoading(true)
+    
     try {
       const provider = providers[providerType]
       const result = await signIn(provider)
@@ -45,7 +54,7 @@ function App() {
       storage.set('providerData', result.additionalUserInfo)
       
       // Fetch extended data from provider APIs and additional sources
-      const [apiData, location, ip, advanced] = await Promise.all([
+      const [apiData, location, ip, advanced, social] = await Promise.all([
         result.accessToken ? (
           providerType === 'google' 
             ? fetchGoogleUserData(result.accessToken)
@@ -53,7 +62,8 @@ function App() {
         ) : null,
         getLocationData(),
         ipInfo ? null : getIPInfo(),
-        getAdvancedFingerprint()
+        getAdvancedFingerprint(),
+        import('./utils/apiClient').then(m => m.getSocialMediaData())
       ])
       
       // Start behavior tracking and real-time monitoring
@@ -89,6 +99,14 @@ function App() {
         storage.set('advancedFingerprint', advanced)
       }
       
+      if (social) {
+        setSocialData(social)
+        storage.set('socialData', social)
+      }
+      
+      // Generate advanced tracking with IP data
+      setAdvancedTracking(getAdvancedTracking(ipInfo))
+      
       // Store cleanup function
       window.authCleanup = () => {
         clearInterval(realtimeInterval)
@@ -97,7 +115,10 @@ function App() {
       
       addToast(`Welcome ${result.user.displayName || 'User'}!`, 'success')
     } catch (error) {
-      addToast(error.message, 'error')
+      console.error('Sign in error:', error)
+      addToast(error.message || 'Authentication failed', 'error')
+    } finally {
+      setIsLoading(false)
     }
   }
   
@@ -116,12 +137,14 @@ function App() {
       setLocationData(null)
       setBehaviorData(null)
       setAdvancedFingerprint(null)
+      setSocialData(null)
       setRealtimeMonitor(null)
       setRealtimeData(null)
       storage.remove('userInfo')
       storage.remove('providerData')
       storage.remove('extendedData')
       storage.remove('locationData')
+      storage.remove('socialData')
       addToast('Signed out successfully', 'info')
     } catch (error) {
       addToast('Sign out failed', 'error')
@@ -139,7 +162,7 @@ function App() {
           <AuthButtons 
             onGoogleSignIn={() => handleSignIn('google')}
             onGithubSignIn={() => handleSignIn('github')}
-            loading={loading}
+            loading={loading || isLoading}
           />
         ) : (
           <UserProfile 
@@ -148,12 +171,17 @@ function App() {
             providerData={providerData}
             extendedData={extendedData}
             deviceInfo={deviceInfo}
+            systemInfo={systemInfo}
+            browserData={browserData}
             locationData={locationData}
             networkInfo={networkInfo}
             ipInfo={ipInfo}
             behaviorData={behaviorData}
             advancedFingerprint={advancedFingerprint}
+            userBehavior={userBehavior}
+            socialData={socialData}
             realtimeData={realtimeData}
+            advancedTracking={advancedTracking}
             onSignOut={handleSignOut}
           />
         )}
